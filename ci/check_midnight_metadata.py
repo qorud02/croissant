@@ -17,12 +17,11 @@ inputs = [
     "2024-03-18T12:00:00Z",
     "2024-03-18T00:00:00.000001+09:00",
 ]
+standard_context = json.loads(Path('datasets/1.0/titanic/metadata.json').read_text(encoding='utf-8'))['@context']
 results = []
 for value in inputs:
     metadata = {
-        "@context": {"@vocab": "https://schema.org/", "@language": "en",
-                     "cr": "http://mlcommons.org/croissant/",
-                     "dct": "http://purl.org/dc/terms/", "conformsTo": "dct:conformsTo"},
+        "@context": standard_context,
         "@type": "Dataset", "name": "synthetic-date-roundtrip",
         "description": "Local synthetic date metadata.",
         "conformsTo": "http://mlcommons.org/croissant/1.0",
