@@ -13,13 +13,22 @@ jobs:
         python: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - name: Install test dependencies
-        run: python -m pip install './python/mlcroissant[git,image,parquet,beam]' pytest 'black==23.11.0' isort
+        run: python -m pip install './python/mlcroissant[git,image,parquet,beam,audio,dicom]' pytest 'black==23.11.0' isort
       - name: Focused dates and metadata tests
         run: python -m pytest python/mlcroissant/mlcroissant/_src/core/dates_test.py python/mlcroissant/mlcroissant/_src/structure_graph/nodes/metadata_test.py -q
+      - name: Public Dataset metadata before and after
+        run: |
+          cp python/mlcroissant/mlcroissant/_src/core/dates.py "$RUNNER_TEMP/dates_patched.py"
+          git show 093b32f699e801ed9775d078846a36173ea8555d:python/mlcroissant/mlcroissant/_src/core/dates.py > python/mlcroissant/mlcroissant/_src/core/dates.py
+          python ci/check_midnight_metadata.py --expect baseline
+          cp "$RUNNER_TEMP/dates_patched.py" python/mlcroissant/mlcroissant/_src/core/dates.py
+          python ci/check_midnight_metadata.py --expect patched
       - name: Hermetic regression suite
         run: python -m pytest python/mlcroissant/mlcroissant -m 'not nonhermetic' -q
       - name: Formatting of changed files
