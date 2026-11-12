@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install unchanged upstream base
-        run: python -m pip install './python/mlcroissant[git]' pytest
+        run: python -m pip install './python/mlcroissant[git,image,parquet,beam,audio,dicom]' pytest
       - name: Reproduce and classify the four original failures
         run: |
           set +e
