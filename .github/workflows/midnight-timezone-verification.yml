@@ -27,7 +27,7 @@ jobs:
       - name: Public Dataset metadata before and after
         run: |
           cp python/mlcroissant/mlcroissant/_src/core/dates.py "$RUNNER_TEMP/dates_patched.py"
-          git show 093b32f699e801ed9775d078846a36173ea8555d:python/mlcroissant/mlcroissant/_src/core/dates.py > python/mlcroissant/mlcroissant/_src/core/dates.py
+          cp ci/dates_baseline.py python/mlcroissant/mlcroissant/_src/core/dates.py
           python ci/check_midnight_metadata.py --expect baseline
           cp "$RUNNER_TEMP/dates_patched.py" python/mlcroissant/mlcroissant/_src/core/dates.py
           python ci/check_midnight_metadata.py --expect patched
