@@ -21,14 +21,16 @@ def _metadata(root, encoding_format, extension, extract, *, archived):
     }
     if archived:
         archive = root / "records.zip"
-        distribution.append({
-            "@type": "cr:FileObject",
-            "@id": "archive",
-            "name": "archive",
-            "contentUrl": "records.zip",
-            "encodingFormat": "application/zip",
-            "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
-        })
+        distribution.append(
+            {
+                "@type": "cr:FileObject",
+                "@id": "archive",
+                "name": "archive",
+                "contentUrl": str(archive),
+                "encodingFormat": "application/zip",
+                "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+            }
+        )
         file_set["containedIn"] = {"@id": "archive"}
     distribution.append(file_set)
     metadata = {
@@ -42,18 +44,22 @@ def _metadata(root, encoding_format, extension, extract, *, archived):
         "datePublished": "2024-01-01",
         "citeAs": "Synthetic regression fixture",
         "distribution": distribution,
-        "recordSet": [{
-            "@type": "cr:RecordSet",
-            "@id": "records",
-            "name": "records",
-            "field": [{
-                "@type": "cr:Field",
-                "@id": "records/value",
-                "name": "records/value",
-                "dataType": "sc:Text",
-                "source": {"fileSet": {"@id": "files"}, "extract": extract},
-            }],
-        }],
+        "recordSet": [
+            {
+                "@type": "cr:RecordSet",
+                "@id": "records",
+                "name": "records",
+                "field": [
+                    {
+                        "@type": "cr:Field",
+                        "@id": "records/value",
+                        "name": "records/value",
+                        "dataType": "sc:Text",
+                        "source": {"fileSet": {"@id": "files"}, "extract": extract},
+                    }
+                ],
+            }
+        ],
     }
     path = root / ("archived.json" if archived else "plain.json")
     path.write_text(json.dumps(metadata), encoding="utf-8")
@@ -68,12 +74,16 @@ def _metadata(root, encoding_format, extension, extract, *, archived):
     ],
 )
 @pytest.mark.parametrize("count", [1, 2])
-def test_archive_fields_match_plain_files(tmp_path, encoding_format, extension, extract, count):
+def test_archive_fields_match_plain_files(
+    tmp_path, encoding_format, extension, extract, count
+):
     values = ["alpha", "한글"][:count]
     paths = []
     for index, value in enumerate(values):
         path = tmp_path / f"part-{index}.{extension}"
-        content = json.dumps({"value": value}) if extension == "json" else f"value\n{value}\n"
+        content = (
+            json.dumps({"value": value}) if extension == "json" else f"value\n{value}\n"
+        )
         path.write_text(content, encoding="utf-8")
         paths.append(path)
     archive = tmp_path / "records.zip"
@@ -84,7 +94,9 @@ def test_archive_fields_match_plain_files(tmp_path, encoding_format, extension, 
     original = archive.read_bytes()
     expected = sorted(value.encode("utf-8") for value in values)
     for archived in (False, True):
-        path = _metadata(tmp_path, encoding_format, extension, extract, archived=archived)
+        path = _metadata(
+            tmp_path, encoding_format, extension, extract, archived=archived
+        )
         records = list(Dataset(str(path)).records("records"))
         assert sorted(record["records/value"] for record in records) == expected
     assert archive.read_bytes() == original
