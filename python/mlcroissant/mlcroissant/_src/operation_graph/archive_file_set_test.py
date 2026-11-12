@@ -21,16 +21,14 @@ def _metadata(root, encoding_format, extension, extract, *, archived):
     }
     if archived:
         archive = root / "records.zip"
-        distribution.append(
-            {
-                "@type": "cr:FileObject",
-                "@id": "archive",
-                "name": "archive",
-                "contentUrl": str(archive),
-                "encodingFormat": "application/zip",
-                "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
-            }
-        )
+        distribution.append({
+            "@type": "cr:FileObject",
+            "@id": "archive",
+            "name": "archive",
+            "contentUrl": str(archive),
+            "encodingFormat": "application/zip",
+            "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+        })
         file_set["containedIn"] = {"@id": "archive"}
     distribution.append(file_set)
     metadata = {
